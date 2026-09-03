@@ -84,11 +84,9 @@ Campus-Career-Intelligence/
 ├── Campus_career_intelligence.pbix
 │
 ├── dataset/
-│   ├── .gitkeep
 │   └── student_placement.csv
 │
 ├── sql/
-│   ├── .gitkeep
 │   └── placement_analysis.sql
 │
 └── README.md
