@@ -1,5 +1,9 @@
 # Campus Career Intelligence – Student Placement Analytics Dashboard
 
+## 📊 Dashboard Preview
+
+![Campus Career Intelligence Dashboard](images/PowerBI_Dashboard.png)
+
 ## 📊 Project Overview
 
 Campus Career Intelligence is a data analytics and business intelligence project designed to analyze student placement outcomes and identify the academic, technical, and professional factors associated with employability.
