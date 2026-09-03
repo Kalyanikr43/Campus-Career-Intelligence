@@ -1,329 +1,403 @@
-CREATE DATABASE campus_career_intelligence;
+-- ============================================================
+-- CAMPUS CAREER INTELLIGENCE
+-- Student Placement Analytics
+-- ============================================================
+
+-- Create and select database
+CREATE DATABASE IF NOT EXISTS campus_career_intelligence;
 USE campus_career_intelligence;
 
+
+-- ============================================================
+-- DATASET VALIDATION
+-- ============================================================
+
+-- Check total number of students
 SELECT COUNT(*) AS total_students
 FROM student_placement;
 
+-- View sample records
 SELECT *
 FROM student_placement
 LIMIT 10;
 
-DESCRIBE Student_placement;
+-- View table structure
+DESCRIBE student_placement;
 
-SELECT placement_status,COUNT(*) AS students
+-- Check placement status distribution
+SELECT
+    placement_status,
+    COUNT(*) AS students
 FROM student_placement
 GROUP BY placement_status;
 
-SELECT COUNT(*) AS missing_placement_status
+-- Check missing placement status
+SELECT
+    COUNT(*) AS missing_placement_status
 FROM student_placement
 WHERE placement_status IS NULL;
 
--- Analysis 1: Overall Placement Performance
+
+-- ============================================================
+-- ANALYSIS 1: OVERALL PLACEMENT PERFORMANCE
+-- ============================================================
+
 SELECT
-	COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 
-ELSE 0 END) AS placed_students,
-	SUM(CASE WHEN placement_status = 0 THEN 1 
-ELSE 0 END) AS not_placed_students,
-	ROUND(
-		100.0 * SUM(CASE WHEN placement_status = 1
-THEN 1 ELSE 0 END) / COUNT(*),
-	2
- ) AS placement_rate
+    COUNT(*) AS total_students,
+    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        AS placed_students,
+    SUM(CASE WHEN placement_status = 0 THEN 1 ELSE 0 END)
+        AS not_placed_students,
+    ROUND(
+        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS placement_rate
 FROM student_placement;
 
--- Analysis 2: Placement by CGPA Band
+
+-- ============================================================
+-- ANALYSIS 2: PLACEMENT BY CGPA BAND
+-- ============================================================
+
 SELECT
-	cgpa_band,
+    cgpa_band,
     COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1
-ELSE 0 END) AS placed_students,
-	ROUND(
-		100.0 * SUM(CASE WHEN placement_status = 1
-THEN 1 ELSE 0 END) / COUNT(*),
-		2
-	) AS placement_rate
+    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        AS placed_students,
+    ROUND(
+        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS placement_rate
 FROM student_placement
 GROUP BY cgpa_band
-ORDER BY cgpa_band;
-
--- Analysis 3: Placement by Internship Category
-SELECT 
-	internship_category,
-    COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) AS placed_students,
-    ROUND(100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 Else 0 END) / COUNT(*),2)
-    AS placement_rate
-FROM student_placement
-GROUP BY internship_category
 ORDER BY placement_rate DESC;
 
--- Analysis 4: Placement by Project Category
-SELECT 
-	CASE
-		WHEN live_projects = 0 THEN 'No Projects'
+
+-- ============================================================
+-- ANALYSIS 3: PLACEMENT BY INTERNSHIP CATEGORY
+-- ============================================================
+
+SELECT
+    Internship_category,
+    COUNT(*) AS total_students,
+    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        AS placed_students,
+    ROUND(
+        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
+        / COUNT(*),
+        2
+    ) AS placement_rate
+FROM student_placement
+GROUP BY Internship_category
+ORDER BY placement_rate DESC;
+
+
+-- ============================================================
+-- ANALYSIS 4: PLACEMENT BY PROJECT CATEGORY
+-- ============================================================
+
+SELECT
+    CASE
+        WHEN live_projects = 0 THEN 'No Projects'
         WHEN live_projects = 1 THEN '1 Project'
         ELSE '2+ Projects'
-	END AS project_category,
-    
+    END AS project_category,
+
     COUNT(*) AS total_students,
+
     SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
+        CASE
+            WHEN placement_status = 1 THEN 1
             ELSE 0
-		END
-	) AS placed_students,
-    
+        END
+    ) AS placed_students,
+
     ROUND(
-		100.0 * SUM(
-			CASE
-				WHEN placement_status = 1 THEN 1
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
                 ELSE 0
-			END
-		) / COUNT(*),
+            END
+        ) / COUNT(*),
         2
-	) AS placement_rate
+    ) AS placement_rate
+
 FROM student_placement
-GROUP BY 
-	CASE
-		WHEN live_projects = 0 THEN 'No Projects'
+
+GROUP BY
+    CASE
+        WHEN live_projects = 0 THEN 'No Projects'
         WHEN live_projects = 1 THEN '1 Project'
-        Else '2+ Projects'
-	END
+        ELSE '2+ Projects'
+    END
+
 ORDER BY placement_rate DESC;
 
--- Analysis 5: 
-SELECT
-	CASE
-		WHEN technical_skill_score < 50 THEN
-	'Below 50'
-		WHEN technical_skill_score < 60 THEN
-	'50-59'
-		WHEN technical_skill_score < 70 THEN
-	'60-69'
-		WHEN technical_skill_score < 80 THEN
-	'70-79'
-		WHEN technical_skill_score < 90 THEN
-	'80-89'
-		ELSE '90+'
-	    END AS technical_skill_band,
-        COUNT(*) AS total_students,
-        SUM(
-			CASE
-               WHEN placement_status = 1 THEN 1
-               ELSE 0
-			END
-		) AS placed_students,
-        ROUND(
-			100.0 * SUM(
-				CASE
-					WHEN placement_status = 1 THEN 1
-                    ELSE 0
-                    END
-				) / COUNT(*),2 ) AS placement_rate
-		FROM student_placement
-        
-        GROUP BY 
-			CASE
-				WHEN technical_skill_score < 50 THEN
-			'Below 50'
-				WHEN technical_skill_score < 60 THEN
-			'50-59'
-				WHEN technical_skill_score < 70 THEN
-			'60-69'
-				WHEN technical_skill_score < 80 THEN
-			'70-79'
-				WHEN technical_skill_score < 90 THEN
-			'80-89'
-				ELSE '90+'
-			END
-		ORDER BY placement_rate DESC;
 
--- Analysis 6: Placement by soft skill band
+-- ============================================================
+-- ANALYSIS 5: PLACEMENT BY TECHNICAL SKILL BAND
+-- ============================================================
+
 SELECT
-	CASE
-		WHEN soft_skill_score < 50 Then 'Below 50'
-        WHEN soft_skill_score < 60 Then '50-59'
-        WHEN soft_skill_score < 70 Then '60-69'
-        WHEN soft_skill_score < 80 Then '70-79'
-        WHEN soft_skill_score < 90 Then '80-89'
-        ELSE '90+'
-	END AS soft_skill_band,
-    COUNT(*) AS total_students,
-    SUM(
-		CASE
-			WHEN placement_status  = 1 THEN 1
-            ELSE 0
-		END
-	) AS placed_students,
-    ROUND(
-		100.0 * SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
-			ELSE 0
-		END
-		) / COUNT(*),2 ) AS placement_rate
-	FROM student_placement
-    GROUP BY
     CASE
-		WHEN soft_skill_score < 50 Then 'Below 50'
-        WHEN soft_skill_score < 60 Then '50-59'
-        WHEN soft_skill_score < 70 Then '60-69'
-        WHEN soft_skill_score < 80 Then '70-79'
-        WHEN soft_skill_score < 90 Then '80-89'
+        WHEN technical_skill_score < 50 THEN 'Below 50'
+        WHEN technical_skill_score < 60 THEN '50-59'
+        WHEN technical_skill_score < 70 THEN '60-69'
+        WHEN technical_skill_score < 80 THEN '70-79'
+        WHEN technical_skill_score < 90 THEN '80-89'
         ELSE '90+'
-	END
-ORDER BY placement_rate DESC;
+    END AS technical_skill_band,
 
--- Analysis 7: Placement by Attendance Band
-SELECT
-	CASE
-		WHEN attendance_percentage < 60 Then 'Below 60%'
-        WHEN attendance_percentage < 70 Then '60-69%'
-        WHEN attendance_percentage < 80 Then '70-79%'
-        WHEN attendance_percentage < 90 Then '80-89%'
-        
-        ELSE '90%+'
-	END AS attendance_band,
     COUNT(*) AS total_students,
+
     SUM(
-		CASE
-			WHEN placement_status  = 1 THEN 1
+        CASE
+            WHEN placement_status = 1 THEN 1
             ELSE 0
-		END
-	) AS placed_students,
+        END
+    ) AS placed_students,
+
     ROUND(
-		100.0 * SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
-			ELSE 0
-		END
-		) / COUNT(*),2 ) AS placement_rate
-	FROM student_placement
-    GROUP BY
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS placement_rate
+
+FROM student_placement
+
+GROUP BY
     CASE
-		WHEN attendance_percentage < 60 Then 'Below 60%'
-        WHEN attendance_percentage < 70 Then '60-69%'
-        WHEN attendance_percentage < 80 Then '70-79%'
-        WHEN attendance_percentage < 90 Then '80-89%'
-        
-        ELSE '90%+'
-	END
+        WHEN technical_skill_score < 50 THEN 'Below 50'
+        WHEN technical_skill_score < 60 THEN '50-59'
+        WHEN technical_skill_score < 70 THEN '60-69'
+        WHEN technical_skill_score < 80 THEN '70-79'
+        WHEN technical_skill_score < 90 THEN '80-89'
+        ELSE '90+'
+    END
+
 ORDER BY placement_rate DESC;
 
--- Analysis 8: Placements by Backlog Category
+
+-- ============================================================
+-- ANALYSIS 6: PLACEMENT BY SOFT SKILL BAND
+-- ============================================================
+
 SELECT
-	CASE
-		WHEN backlogs = 0  Then 'No Backlogs'
-        WHEN backlogs = 1 Then '1 Backlog'
-        WHEN backlogs = 2 Then '2 Backlogs'
-        ELSE '3+ Backlogs'
-	END AS backlog_category,
+    CASE
+        WHEN soft_skill_score < 50 THEN 'Below 50'
+        WHEN soft_skill_score < 60 THEN '50-59'
+        WHEN soft_skill_score < 70 THEN '60-69'
+        WHEN soft_skill_score < 80 THEN '70-79'
+        WHEN soft_skill_score < 90 THEN '80-89'
+        ELSE '90+'
+    END AS soft_skill_band,
+
     COUNT(*) AS total_students,
+
     SUM(
-		CASE
-			WHEN placement_status  = 1 THEN 1
+        CASE
+            WHEN placement_status = 1 THEN 1
             ELSE 0
-		END
-	) AS placed_students,
+        END
+    ) AS placed_students,
+
     ROUND(
-		100.0 * SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
-			ELSE 0
-		END
-		) / COUNT(*),2 ) AS placement_rate
-	FROM student_placement
-    GROUP BY
-   CASE
-		WHEN backlogs = 0  Then 'No Backlogs'
-        WHEN backlogs = 1 Then '1 Backlog'
-        WHEN backlogs = 2 Then '2 Backlogs'
-        ELSE '3+ Backlogs'
-	END
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS placement_rate
+
+FROM student_placement
+
+GROUP BY
+    CASE
+        WHEN soft_skill_score < 50 THEN 'Below 50'
+        WHEN soft_skill_score < 60 THEN '50-59'
+        WHEN soft_skill_score < 70 THEN '60-69'
+        WHEN soft_skill_score < 80 THEN '70-79'
+        WHEN soft_skill_score < 90 THEN '80-89'
+        ELSE '90+'
+    END
+
 ORDER BY placement_rate DESC;
 
--- Analysis 9:Placement by Extracurricular Activities
+
+-- ============================================================
+-- ANALYSIS 7: PLACEMENT BY ATTENDANCE BAND
+-- ============================================================
+
 SELECT
-	extracurricular_activities,
+    CASE
+        WHEN attendance_percentage < 60 THEN 'Below 60%'
+        WHEN attendance_percentage < 70 THEN '60-69%'
+        WHEN attendance_percentage < 80 THEN '70-79%'
+        WHEN attendance_percentage < 90 THEN '80-89%'
+        ELSE '90%+'
+    END AS attendance_band,
+
     COUNT(*) AS total_students,
-    
+
     SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
+        CASE
+            WHEN placement_status = 1 THEN 1
             ELSE 0
-		eND
-	) AS placed_students,
-	ROUND(
-		100.0 * SUM(
-		CASE
-			WHEN placement_status = 1 THEN 1
-			ELSE 0
-		END
-		) / COUNT(*),2 ) AS placement_rate
-	FROM student_placement
+        END
+    ) AS placed_students,
+
+    ROUND(
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS placement_rate
+
+FROM student_placement
+
+GROUP BY
+    CASE
+        WHEN attendance_percentage < 60 THEN 'Below 60%'
+        WHEN attendance_percentage < 70 THEN '60-69%'
+        WHEN attendance_percentage < 80 THEN '70-79%'
+        WHEN attendance_percentage < 90 THEN '80-89%'
+        ELSE '90%+'
+    END
+
+ORDER BY placement_rate DESC;
+
+
+-- ============================================================
+-- ANALYSIS 8: PLACEMENT BY BACKLOG CATEGORY
+-- ============================================================
+
+SELECT
+    CASE
+        WHEN backlogs = 0 THEN 'No Backlogs'
+        WHEN backlogs = 1 THEN '1 Backlog'
+        WHEN backlogs = 2 THEN '2 Backlogs'
+        ELSE '3+ Backlogs'
+    END AS backlog_category,
+
+    COUNT(*) AS total_students,
+
+    SUM(
+        CASE
+            WHEN placement_status = 1 THEN 1
+            ELSE 0
+        END
+    ) AS placed_students,
+
+    ROUND(
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS placement_rate
+
+FROM student_placement
+
+GROUP BY
+    CASE
+        WHEN backlogs = 0 THEN 'No Backlogs'
+        WHEN backlogs = 1 THEN '1 Backlog'
+        WHEN backlogs = 2 THEN '2 Backlogs'
+        ELSE '3+ Backlogs'
+    END
+
+ORDER BY placement_rate DESC;
+
+
+-- ============================================================
+-- ANALYSIS 9: PLACEMENT BY EXTRACURRICULAR ACTIVITIES
+-- ============================================================
+
+SELECT
+    extracurricular_activities,
+    COUNT(*) AS total_students,
+
+    SUM(
+        CASE
+            WHEN placement_status = 1 THEN 1
+            ELSE 0
+        END
+    ) AS placed_students,
+
+    ROUND(
+        100.0 * SUM(
+            CASE
+                WHEN placement_status = 1 THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS placement_rate
+
+FROM student_placement
+
 GROUP BY extracurricular_activities
+
 ORDER BY placement_rate DESC;
-    
--- Analysis 10: Average Salary by CGPA Band
+
+
+-- ============================================================
+-- ANALYSIS 10: AVERAGE SALARY BY CGPA BAND
+-- ============================================================
+
 SELECT
-	cgpa_band,
+    cgpa_band,
     COUNT(*) AS placed_students,
-    ROUND(AVG(salary_package_lpa),2) AS average_salary_lpa,
-    ROUND(MAX(salary_package_lpa),2) AS highest_salary_lpa,
-    ROUND(MIN(salary_package_lpa),2) AS lowest_salary_lpa
+    ROUND(AVG(salary_package_lpa), 2) AS average_salary_lpa,
+    ROUND(MAX(salary_package_lpa), 2) AS highest_salary_lpa,
+    ROUND(MIN(salary_package_lpa), 2) AS lowest_salary_lpa
+
 FROM student_placement
+
 WHERE placement_status = 1
+
 GROUP BY cgpa_band
+
 ORDER BY average_salary_lpa DESC;
 
--- Analysis 11: Average Salary by Internship
+
+-- ============================================================
+-- ANALYSIS 11: AVERAGE SALARY BY INTERNSHIP CATEGORY
+-- ============================================================
+
 SELECT
-	Internship_category,
+    Internship_category,
     COUNT(*) AS placed_students,
-    ROUND(AVG(salary_package_lpa),2) AS average_salary_lpa,
-    ROUND(MAX(salary_package_lpa),2) AS highest_salary_lpa,
-    ROUND(MIN(salary_package_lpa),2) AS lowest_salary_lpa
+    ROUND(AVG(salary_package_lpa), 2) AS average_salary_lpa,
+    ROUND(MAX(salary_package_lpa), 2) AS highest_salary_lpa,
+    ROUND(MIN(salary_package_lpa), 2) AS lowest_salary_lpa
+
 FROM student_placement
+
 WHERE placement_status = 1
-GROUP BY InternshiP_category
+
+GROUP BY Internship_category
+
 ORDER BY average_salary_lpa DESC;
 
--- Analysis 12: Placement Risk Segmentation
-SELECT
-    student_id,
-    cgpa,
-    technical_skill_score,
-    internship_count,
-    live_projects,
-    backlogs,
-    placement_status,
 
-    CASE
-        WHEN cgpa < 7
-             AND technical_skill_score < 60
-             AND internship_count = 0
-             AND live_projects = 0
-             AND backlogs >= 2
-        THEN 'High Risk'
+-- ============================================================
+-- ANALYSIS 12: PLACEMENT RISK SEGMENTATION
+-- ============================================================
 
-        WHEN (
-             cgpa < 7
-             AND technical_skill_score < 70
-             )
-             OR internship_count = 0
-             OR backlogs >= 2
-        THEN 'Medium Risk'
-
-        ELSE 'Low Risk'
-    END AS placement_risk
-
-FROM student_placement;
-USE college;
-
-ALTER TABLE student_placement
-CHANGE COLUMN `ï»¿student_id` student_id INT;
-USE campus_career_intelligence;
 SELECT
     CASE
         WHEN cgpa < 7
@@ -386,181 +460,3 @@ GROUP BY
     END
 
 ORDER BY placement_rate;
-
-SELECT
-    COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) AS placed_students,
-    SUM(CASE WHEN placement_status = 0 THEN 1 ELSE 0 END) AS not_placed_students,
-    ROUND(
-        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) / COUNT(*),
-        2
-    ) AS overall_placement_rate
-FROM student_placement;
-
-SELECT
-    cgpa_band,
-    COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) AS placed_students,
-    ROUND(
-        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) / COUNT(*),
-        2
-    ) AS placement_rate
-FROM student_placement
-GROUP BY cgpa_band
-ORDER BY placement_rate DESC;
-
-SELECT
-    internship_category,
-    COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) AS placed_students,
-    ROUND(
-        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
-        / COUNT(*),
-        2
-    ) AS placement_rate
-FROM student_placement
-GROUP BY internship_category
-ORDER BY placement_rate DESC;
-
--- Step 13.4: Technical Skills and Placement
-
-SELECT
-    CASE
-        WHEN technical_skill_score < 50 THEN 'Below 50'
-        WHEN technical_skill_score < 60 THEN '50-59'
-        WHEN technical_skill_score < 70 THEN '60-69'
-        WHEN technical_skill_score < 80 THEN '70-79'
-        WHEN technical_skill_score < 90 THEN '80-89'
-        ELSE '90+'
-    END AS technical_skill_band,
-
-    COUNT(*) AS total_students,
-
-    SUM(
-        CASE
-            WHEN placement_status = 1 THEN 1
-            ELSE 0
-        END
-    ) AS placed_students,
-
-    ROUND(
-        100.0 * SUM(
-            CASE
-                WHEN placement_status = 1 THEN 1
-                ELSE 0
-            END
-        ) / COUNT(*),
-        2
-    ) AS placement_rate
-
-FROM student_placement
-
-GROUP BY
-    CASE
-        WHEN technical_skill_score < 50 THEN 'Below 50'
-        WHEN technical_skill_score < 60 THEN '50-59'
-        WHEN technical_skill_score < 70 THEN '60-69'
-        WHEN technical_skill_score < 80 THEN '70-79'
-        WHEN technical_skill_score < 90 THEN '80-89'
-        ELSE '90+'
-    END
-
-ORDER BY placement_rate DESC;
-
--- Step 13.5: Backlogs and Placement
-
-SELECT
-    CASE
-        WHEN backlogs = 0 THEN 'No Backlogs'
-        WHEN backlogs = 1 THEN '1 Backlog'
-        WHEN backlogs = 2 THEN '2 Backlogs'
-        ELSE '3+ Backlogs'
-    END AS backlog_category,
-
-    COUNT(*) AS total_students,
-
-    SUM(
-        CASE
-            WHEN placement_status = 1 THEN 1
-            ELSE 0
-        END
-    ) AS placed_students,
-
-    ROUND(
-        100.0 * SUM(
-            CASE
-                WHEN placement_status = 1 THEN 1
-                ELSE 0
-            END
-        ) / COUNT(*),
-        2
-    ) AS placement_rate
-
-FROM student_placement
-
-GROUP BY
-    CASE
-        WHEN backlogs = 0 THEN 'No Backlogs'
-        WHEN backlogs = 1 THEN '1 Backlog'
-        WHEN backlogs = 2 THEN '2 Backlogs'
-        ELSE '3+ Backlogs'
-    END
-
-ORDER BY placement_rate DESC;
-
-SELECT
-    CASE
-        WHEN backlogs = 0 THEN 'No Backlogs'
-        WHEN backlogs = 1 THEN '1 Backlog'
-        WHEN backlogs = 2 THEN '2 Backlogs'
-        ELSE '3+ Backlogs'
-    END AS backlog_category,
-
-    COUNT(*) AS total_students,
-
-    SUM(
-        CASE
-            WHEN placement_status = 1 THEN 1
-            ELSE 0
-        END
-    ) AS placed_students,
-
-    ROUND(
-        100.0 * SUM(
-            CASE
-                WHEN placement_status = 1 THEN 1
-                ELSE 0
-            END
-        ) / COUNT(*),
-        2
-    ) AS placement_rate
-
-FROM student_placement
-
-GROUP BY
-    CASE
-        WHEN backlogs = 0 THEN 'No Backlogs'
-        WHEN backlogs = 1 THEN '1 Backlog'
-        WHEN backlogs = 2 THEN '2 Backlogs'
-        ELSE '3+ Backlogs'
-    END;
-    
-SELECT
-    extracurricular_activities,
-    COUNT(*) AS total_students,
-    SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END) AS placed_students,
-    ROUND(
-        100.0 * SUM(CASE WHEN placement_status = 1 THEN 1 ELSE 0 END)
-        / COUNT(*),
-        2
-    ) AS placement_rate
-FROM student_placement
-GROUP BY extracurricular_activities
-ORDER BY placement_rate DESC;
-
-
-    
-			
-        
-
-
