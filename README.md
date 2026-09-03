@@ -74,6 +74,7 @@ The dashboard can be used by placement teams and academic departments to:
 - Evaluate the role of internships and projects.
 - Monitor the impact of academic performance and backlogs.
 - Support data-driven placement strategies.
+  
 
 ## 📂 Repository Structure
 
@@ -91,7 +92,7 @@ Campus-Career-Intelligence/
 │   └── placement_analysis.sql
 │
 └── README.md
-
+```
 ## 🚀 Future Enhancements
 
 - Add automated data refresh.
