@@ -1,0 +1,17 @@
+# Power BI temporary files
+*.tmp
+*.pbit
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
