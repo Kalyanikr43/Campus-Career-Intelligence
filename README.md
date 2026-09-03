@@ -92,6 +92,8 @@ Campus-Career-Intelligence/
 │
 ├── sql/
 │   └── placement_analysis.sql
+├── images/
+│   └── PowerBI_Dashboard.png
 │
 └── README.md
 ```
